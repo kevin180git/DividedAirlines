@@ -12,6 +12,7 @@ import SpriteKit
 import GameplayKit
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
+    var playAgainButton: SKSpriteNode?
     var wastedLabel: SKLabelNode?
     
     var scoreLabel: SKLabelNode?
@@ -56,8 +57,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func didMove(to view: SKView) {
         
         self.physicsWorld.contactDelegate = self //for contact detection
+        
+        
+        playAgainButton = self.childNode(withName: "playAgainButton") as! SKSpriteNode
+        playAgainButton?.name = "playAgainButton"
+        playAgainButton?.isUserInteractionEnabled = false
+        playAgainButton?.isHidden = true
+        
         wastedLabel = self.childNode(withName: "wastedLabel") as? SKLabelNode
-        wastedLabel?.fontName = "FORQUE"
         wastedLabel?.isHidden = true
         finalScoreLabel = self.childNode(withName: "finalScoreLabel") as?SKLabelNode
         finalScoreLabel?.isHidden = true
@@ -125,6 +132,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         if cA == playerCategory || cB == playerCategory {
             let otherNode:SKNode = (cA == playerCategory) ? contact.bodyB.node! : contact.bodyA.node!
             playerCollide(with: otherNode)
+            let playerNode:SKNode = (cA == playerCategory) ? contact.bodyA.node! : contact.bodyB.node!
+            if playerState != compState {
+                playerNode.removeFromParent()
+            }
+
         } else if cA == recCategory || cB == recCategory {
             let otherNode:SKNode = (cA == recCategory) ? contact.bodyB.node! : contact.bodyA.node!
             recCollide(with: otherNode) //s
@@ -183,8 +195,88 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         finalScoreLabel?.isHidden = false
         finalScore?.text = "\(finalScoreNum)"
         finalScore?.isHidden = false
-        wastedLabel?.isHidden = false
-        spawnAll3()
+        playAgainButton?.isHidden = false
+        //wastedLabel?.isHidden = false
+        //spawnAll3()
+//        let nextScene = MainMenu(fileNamed: "MainMenu")
+//        nextScene?.scaleMode = .aspectFill
+//        self.view?.presentScene(nextScene)
+        if playerState == 1 {
+            
+            var dao: SKNode?
+            let scene:SKScene = SKScene(fileNamed: "Dao")!
+            dao = scene.childNode(withName: "Dao")
+            dao?.position = CGPoint(x: 0, y: 0)
+            dao?.move(toParent: self)
+            
+            dao?.physicsBody?.categoryBitMask = noCategory
+            dao?.physicsBody?.collisionBitMask = noCategory //playerCategory
+            dao?.physicsBody?.contactTestBitMask = noCategory
+            
+            dao?.physicsBody?.velocity = (CGVector(dx: 0, dy: -300))
+            //print("dao move")
+            spawnAll3(with: dao!)
+            
+            var emit:SKEmitterNode?
+            let scene2:SKScene = SKScene(fileNamed: "emitter")!
+            emit = scene2.childNode(withName: "emitter") as! SKEmitterNode
+            emit?.position = (dao?.position)!
+            emit?.move(toParent: dao!)
+            
+            
+        } else if playerState == 2 {
+            var joe: SKNode?
+            let scene:SKScene = SKScene(fileNamed: "joe")!
+            joe = scene.childNode(withName: "Joe")
+            joe?.position = CGPoint(x: 0, y: 0)
+            joe?.move(toParent: self)
+            
+            joe?.physicsBody?.categoryBitMask = noCategory
+            joe?.physicsBody?.collisionBitMask = noCategory //playerCategory
+            joe?.physicsBody?.contactTestBitMask = noCategory
+            
+            joe?.physicsBody?.velocity = (CGVector(dx: 0, dy: -300))
+            //print("joe momve")
+            spawnAll3(with: joe!)
+            
+            var emit:SKEmitterNode?
+            let scene2:SKScene = SKScene(fileNamed: "emitter")!
+            emit = scene2.childNode(withName: "emitter") as! SKEmitterNode
+            emit?.position = (joe?.position)!
+            emit?.move(toParent: joe!)
+            
+            
+        } else if playerState == 3 {
+            var brian: SKNode?
+            let scene:SKScene = SKScene(fileNamed: "Brian")!
+            brian = scene.childNode(withName: "Brian")
+            brian?.position = CGPoint(x: 0, y: 0)
+            brian?.move(toParent: self)
+            
+            brian?.physicsBody?.categoryBitMask = noCategory
+            brian?.physicsBody?.collisionBitMask = noCategory //playerCategory
+            brian?.physicsBody?.contactTestBitMask = noCategory
+            
+            brian?.physicsBody?.velocity = (CGVector(dx: 0, dy: -300))
+            //print("brian move")
+            spawnAll3(with: brian!)
+            
+            var emit:SKEmitterNode?
+            let scene2:SKScene = SKScene(fileNamed: "emitter")!
+            emit = scene2.childNode(withName: "emitter") as! SKEmitterNode
+            emit?.position = (brian?.position)!
+            emit?.move(toParent: brian!)
+            //print("yes")
+            
+            
+
+            
+            
+            
+            
+        }
+
+
         
     }
     
@@ -330,11 +422,29 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             //what impulse - trying to add force based on what side it coming from... not working
             var whatImpulse: CGVector?
             if whichSide > 2 {
-                dividedOfficer?.position = (whichSide == 3 ? bottomRec?.position : topRec?.position)!
+                let rand = Int(arc4random()) % 3 + 1
+                let offset:CGFloat?
+                if rand == 1 {
+                    offset = 0.0
+                } else {
+                    offset = (rand == 2) ? 250.0: -250.0
+                }
+                
+                dividedOfficer?.position = (whichSide == 3 ?  CGPoint(x: (bottomRec?.position.x)! + offset!, y: (bottomRec?.position.y)!) : CGPoint(x: (topRec?.position.x)! + offset!, y: (topRec?.position.y)!))
                 whatImpulse = (whichSide == 3 ?  CGVector(dx: 0, dy: 500): CGVector(dx: 0, dy: -500))
                 
             } else {
-                dividedOfficer?.position = (whichSide == 1 ? leftRec?.position : rightRec?.position)!
+                
+                
+                let rand = Int(arc4random()) % 3 + 1
+                let offset:CGFloat?
+                if rand == 1 {
+                    offset = 0
+                } else {
+                    offset = (rand == 2) ? 286.8: -486.8
+                }
+                
+                dividedOfficer?.position = (whichSide == 1 ?  CGPoint(x: (leftRec?.position.x)!, y: (leftRec?.position.y)! + offset!) : CGPoint(x: (rightRec?.position.x)! , y: (rightRec?.position.y)! + offset!))
                 whatImpulse = (whichSide == 1 ?  CGVector(dx: 500, dy: 0): CGVector(dx: -500, dy: 0))
                 
             }
@@ -354,11 +464,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     
-    func spawnAll3() {
+    func spawnAll3(with player:SKNode) {
         var dividedOfficer: SKNode?
         let scene:SKScene = SKScene(fileNamed: "dividedOfficer")!
         dividedOfficer = scene.childNode(withName: "dividedOfficer")
-        dividedOfficer?.position = CGPoint(x: player!.position.x + 125, y: player!.position.y + 125)
+        dividedOfficer?.position = CGPoint(x: player.position.x + 125, y: player.position.y + 125)
         dividedOfficer?.move(toParent: self)
         
         dividedOfficer?.physicsBody?.categoryBitMask = noCategory
@@ -368,7 +478,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         var dividedOfficer2: SKNode?
         let scene2:SKScene = SKScene(fileNamed: "dividedOfficer2")!
         dividedOfficer2 = scene2.childNode(withName: "dividedOfficer2")
-        dividedOfficer2?.position = CGPoint(x: player!.position.x + -150, y: player!.position.y)
+        dividedOfficer2?.position = CGPoint(x: player.position.x + -150, y: player.position.y)
         dividedOfficer2?.move(toParent: self)
         
         dividedOfficer2?.physicsBody?.categoryBitMask = noCategory
@@ -378,12 +488,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         var dividedOfficer3: SKNode?
         let scene3:SKScene = SKScene(fileNamed: "dividedOfficer3")!
         dividedOfficer3 = scene3.childNode(withName: "dividedOfficer3")
-        dividedOfficer3?.position = CGPoint(x: player!.position.x + 125, y: player!.position.y - 125)
+        dividedOfficer3?.position = CGPoint(x: player.position.x + 125, y: player.position.y - 125)
         dividedOfficer3?.move(toParent: self)
         
         dividedOfficer3?.physicsBody?.categoryBitMask = noCategory
         dividedOfficer3?.physicsBody?.collisionBitMask = noCategory //playerCategory
         dividedOfficer3?.physicsBody?.contactTestBitMask = noCategory
+        
+        dividedOfficer?.physicsBody?.velocity = (player.physicsBody?.velocity)!
+        dividedOfficer2?.physicsBody?.velocity = (player.physicsBody?.velocity)!
+        dividedOfficer3?.physicsBody?.velocity = (player.physicsBody?.velocity)!
     }
     
     func touchMoved(toPoint pos : CGPoint) {
@@ -399,7 +513,31 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchDown(atPoint: t.location(in: self)) }
+//        for t in touches { self.touchDown(atPoint: t.location(in: self)) }
+        for touch: AnyObject in touches {
+            let location = touch.location(in: self)
+            if (playAgainButton?.contains(location))! {
+                print("fuck")
+                let nextScene = SKScene(fileNamed: "GameScene")
+                nextScene?.scaleMode = .aspectFill
+                self.view?.presentScene(nextScene)
+                
+            }
+        }
+//        let touch:UITouch = touches.first!
+//        let positionInScene = touch.location(in: self)
+//        let touchedNode:SKNode = self.nodes(at: positionInScene).first!
+//        
+//        if let name = touchedNode.name {
+//            
+//            if name == "playAgainButton" {
+//                print("fuck")
+//                let nextScene = SKScene(fileNamed: "GameScene")
+//                nextScene?.scaleMode = .aspectFill
+//                self.view?.presentScene(nextScene)
+//                
+//            }
+//        }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
